@@ -10,15 +10,15 @@ namespace Soduku_Solver
         {
             List<string> list = new List<string>()
             {
-                "0 0 4 0 5 0 0 0 0",
-                "9 0 0 7 3 4 6 0 0",
-                "0 0 3 0 2 1 0 4 9",
-                "0 3 5 0 9 0 4 8 0",
-                "0 9 0 0 0 0 0 3 0",
-                "0 7 6 0 1 0 9 2 0",
-                "3 1 0 9 7 0 2 0 0",
-                "0 0 9 1 8 2 0 0 3",
-                "0 0 0 0 6 0 1 0 0"
+                "1 6 4 0 0 0 0 0 2",
+                "2 0 0 4 0 3 9 1 0",
+                "0 0 5 0 8 0 4 0 7",
+                "0 9 0 0 0 6 5 0 0",
+                "5 0 0 1 0 2 0 0 8",
+                "0 0 8 9 0 0 0 3 0",
+                "8 0 9 0 4 0 2 0 0",
+                "0 7 3 5 0 9 0 0 1",
+                "4 0 0 0 0 0 6 7 9"
             };
 
             Solve(list);
@@ -58,7 +58,7 @@ namespace Soduku_Solver
         {
             string[] rows = list.ToArray();
 
-            while(rows.All(v => v.Contains("0")))
+            while(CheckForSodukuDone(rows))
             {
                 // Initialise columns
                 string[] columns = new string[9];
@@ -79,24 +79,113 @@ namespace Soduku_Solver
                 // Initialise subsquares
                 string[] subsquares = new string[9];
 
+                string[] sub = new string[3];
+
                 // Loops through each row
                 for(int i = 0; i < 9; i++)
                 {
+                    string r = rows[i].Replace(" ", "");
 
+                    sub[0] += r.Substring(0, 3);
+                    sub[1] += r.Substring(3, 3);
+                    sub[2] += r[6..];
+                }
+
+                // Set values to each value in subsquare array
+                for(int i = 0; i < 9; i++)
+                {
+                    if(i < 3)
+                    {
+                        subsquares[i] = sub[i % 3].Substring(0, 9);
+                    } else if (i < 6)
+                    {
+                        subsquares[i] = sub[i % 3].Substring(9, 9);
+                    }
+                    else
+                    {
+                        subsquares[i] = sub[i % 3][18..];
+                    }
+                }
+
+                // Solve the soduku
+                // Starts by looping through each row
+                for(int i = 0; i < 9; i++)
+                {
+                    string[] row = rows[i].Split(" ");
+
+                    // Loops through each value in the row
+                    // Also represents the column the value is in
+                    for(int j = 0; j < 9; j++)
+                    {
+                        if(row[j] == "0")
+                        {
+                            List<string> possibleValues = new List<string>();
+
+                            // Tries each value in row to see if it works
+                            for(int k = 1; k <= 9; k++)
+                            {
+                                if (!rows[i].Contains(k.ToString()) && !columns[j].Contains(k.ToString()) && CheckSubsquare(i, j, k, subsquares))
+                                {
+                                    possibleValues.Add(k.ToString());
+                                    //Console.WriteLine(k);
+                                }
+                            }
+
+                            if (possibleValues.Count() == 1)
+                            {
+                                row[j] = possibleValues[0];
+                            } else if(possibleValues.Count() == 0)
+                            {
+                                Console.WriteLine("This soduku is impossible");
+                                Console.ReadKey();
+                            }
+
+                            //foreach(string s in possibleValues)
+                            //{
+                            //    Console.WriteLine(s);
+                            //}
+
+                            //Console.WriteLine("");
+                        }
+                    }
+
+                    rows[i] = string.Join(" ", row);
                 }
 
                 foreach (string s in rows)
                 {
                     Console.WriteLine(s);
                 }
-
-                Console.ReadKey();
+                
+                Console.WriteLine("");
             }
         }
 
-        static bool CheckColumnForValueExist()
+        static bool CheckSubsquare(int row, int column, int value, string[] subsquares)
         {
-            return false;   
+            int[,] subsquareColumns = { { 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 } };
+
+            int subsquare = subsquareColumns[(int)(column / 3), (int)(row / 3)];
+
+            if (!subsquares[subsquare].Contains(value.ToString()))
+            {
+                return true;
+            }
+            else return false;
+        }
+
+        static bool CheckForSodukuDone(string[] soduku)
+        {
+            foreach(string s in soduku)
+            {
+                if (s.Contains("0"))
+                {
+                    return true;
+                }
+            }
+
+            Console.WriteLine("Soduku completed!");
+            return false;
         }
     }
 }
