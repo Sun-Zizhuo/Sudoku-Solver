@@ -58,7 +58,7 @@ namespace Soduku_Solver
         {
             string[] rows = list.ToArray();
 
-            while(CheckForSodukuDone(rows))
+            while(CheckForSudokuDone(rows))
             {
                 // Initialise columns
                 string[] columns = new string[9];
@@ -171,12 +171,12 @@ namespace Soduku_Solver
             {
                 return true;
             }
-            else return false;
+            return false;
         }
 
-        static bool CheckForSodukuDone(string[] soduku)
+        static bool CheckForSudokuDone(string[] sudoku)
         {
-            foreach(string s in soduku)
+            foreach(string s in sudoku)
             {
                 if (s.Contains("0"))
                 {
@@ -184,7 +184,7 @@ namespace Soduku_Solver
                 }
             }
 
-            Console.WriteLine("Soduku completed!");
+            Console.WriteLine("Sudoku completed!");
             return false;
         }
     }
